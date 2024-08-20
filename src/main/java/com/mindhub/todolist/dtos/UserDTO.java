@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
+
     @Schema(description = "Unique identifier of the user", example = "1")
     private Long id;
 
@@ -16,4 +17,6 @@ public class UserDTO {
 
     @Schema(description = "Email address of the user", example = "john@example.com")
     private String email;
+
+    private String password;
 }
