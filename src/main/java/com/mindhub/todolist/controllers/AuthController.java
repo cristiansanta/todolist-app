@@ -1,18 +1,18 @@
 package com.mindhub.todolist.controllers;
 
-import com.mindhub.todolist.dtos.AuthenticationRequest;
-import com.mindhub.todolist.dtos.AuthenticationResponse;
-import com.mindhub.todolist.dtos.UserDTO;
+import com.mindhub.todolist.dtos.LoginRequestDTO;
+import com.mindhub.todolist.dtos.RegisterRequestDTO;
 import com.mindhub.todolist.entities.UserEntity;
-import com.mindhub.todolist.entities.UserRole;
 import com.mindhub.todolist.repositories.UserRepository;
-import com.mindhub.todolist.security.CustomUserDetailsService;
-import com.mindhub.todolist.security.JwtUtil;
+import com.mindhub.todolist.security.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Authentication management APIs")
 public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @Autowired
     private UserRepository userRepository;
@@ -37,19 +35,27 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private JwtUtils jwtUtils;
+
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("Username is already taken!");
+    @Operation(
+            summary = "Register a new user",
+            description = "Register a new user with email and password",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User registered successfully"),
+                    @ApiResponse(responseCode = "400", description = "Email already in use")
+            }
+    )
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequestDTO registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
         }
 
         UserEntity user = new UserEntity();
-        user.setUsername(userDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setEmail(userDTO.getEmail());
-        user.setRole(UserRole.USER);
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole("USER");
 
         userRepository.save(user);
 
@@ -57,18 +63,22 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
-            );
-        } catch (BadCredentialsException e) {
-            throw new Exception("Incorrect username or password", e);
-        }
+    @Operation(
+            summary = "Authenticate user",
+            description = "Authenticate a user and return a JWT token",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Authentication successful"),
+                    @ApiResponse(responseCode = "401", description = "Authentication failed")
+            }
+    )
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final String jwt = jwtUtil.generateToken(userDetails);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String jwt = jwtUtils.generateToken(userDetails);
 
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        return ResponseEntity.ok(jwt);
     }
 }

@@ -1,27 +1,28 @@
 package com.mindhub.todolist.entities;
 
 import jakarta.persistence.*;
-import java.util.Set;
 import lombok.*;
 
+import java.util.Set;
+
+@Entity
+@Table(name = "users")  // Mantenemos el nombre de la tabla como "users"
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "users")
+@AllArgsConstructor
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String username;
-    private String password;
+
+    @Column(unique = true)
     private String email;
 
+    private String password;
+
+    private String role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Task> tasks;
-
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
 }
