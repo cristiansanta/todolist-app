@@ -2,9 +2,11 @@ package com.mindhub.todolist.services;
 
 import com.mindhub.todolist.dtos.UserDTO;
 import com.mindhub.todolist.entities.UserEntity;
+import com.mindhub.todolist.entities.UserRole;
 import com.mindhub.todolist.exceptions.ResourceNotFoundException;
 import com.mindhub.todolist.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = new UserEntity();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        // Note: In a real application, you would hash the password here
+        user.setRole(UserRole.ROLE_USER); // Set default role to USER
         user = userRepository.save(user);
         return convertToDTO(user);
     }
@@ -54,7 +56,25 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
+    @Override
+    public UserDTO promoteToAdmin(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setRole(UserRole.ROLE_ADMIN);
+        user = userRepository.save(user);
+        return convertToDTO(user);
+    }
+
+    @Override
+    public UserDTO demoteToUser(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setRole(UserRole.ROLE_USER);
+        user = userRepository.save(user);
+        return convertToDTO(user);
+    }
+
     private UserDTO convertToDTO(UserEntity user) {
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole().name());
     }
 }

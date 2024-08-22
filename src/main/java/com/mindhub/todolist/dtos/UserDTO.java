@@ -16,4 +16,7 @@ public class UserDTO {
 
     @Schema(description = "Email address of the user", example = "john@example.com")
     private String email;
+
+    @Schema(description = "Role of the user", example = "ROLE_USER")
+    private String role;
 }

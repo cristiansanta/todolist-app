@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")  // Mantenemos el nombre de la tabla como "users"
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +22,9 @@ public class UserEntity {
 
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Task> tasks;
 }

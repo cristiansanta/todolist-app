@@ -3,6 +3,7 @@ package com.mindhub.todolist.controllers;
 import com.mindhub.todolist.dtos.LoginRequestDTO;
 import com.mindhub.todolist.dtos.RegisterRequestDTO;
 import com.mindhub.todolist.entities.UserEntity;
+import com.mindhub.todolist.entities.UserRole;
 import com.mindhub.todolist.repositories.UserRepository;
 import com.mindhub.todolist.security.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,7 +56,7 @@ public class AuthController {
         UserEntity user = new UserEntity();
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setRole("USER");
+        user.setRole(UserRole.ROLE_USER);
 
         userRepository.save(user);
 
