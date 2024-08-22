@@ -6,7 +6,6 @@ import com.mindhub.todolist.entities.UserRole;
 import com.mindhub.todolist.exceptions.ResourceNotFoundException;
 import com.mindhub.todolist.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = new UserEntity();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setRole(UserRole.ROLE_USER); // Set default role to USER
+        user.setRole(UserRole.ROLE_USER);
         user = userRepository.save(user);
         return convertToDTO(user);
     }
