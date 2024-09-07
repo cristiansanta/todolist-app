@@ -55,24 +55,6 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    @Override
-    public UserDTO promoteToAdmin(Long id) {
-        UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setRole(UserRole.ROLE_ADMIN);
-        user = userRepository.save(user);
-        return convertToDTO(user);
-    }
-
-    @Override
-    public UserDTO demoteToUser(Long id) {
-        UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        user.setRole(UserRole.ROLE_USER);
-        user = userRepository.save(user);
-        return convertToDTO(user);
-    }
-
     private UserDTO convertToDTO(UserEntity user) {
         return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole().name());
     }

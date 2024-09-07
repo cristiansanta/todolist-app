@@ -7,6 +7,10 @@ import lombok.*;
 @Getter
 @Setter
 public class RegisterRequestDTO {
+
+    @Schema(description = "User's username", example = "cristiano")
+    private String username;
+
     @Schema(description = "User's email address", example = "user@example.com")
     private String email;
 

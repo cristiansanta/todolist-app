@@ -27,6 +27,13 @@ class AuthControllerE2ETest {
 
     @Test
     void registerUser_shouldReturnOk_whenValidInput() throws Exception {
+        /**
+         * Arrange-Act-Assert (AAA):
+         * Este patrón divide el test en tres partes claras:
+         * a) Arrange (Preparar): En esta fase se prepara todo lo necesario para el test. Esto incluye crear objetos, configurar mocks, y establecer el estado inicial necesario.
+         * b) Act (Actuar): Aquí se realiza la acción que se está probando. Generalmente es una llamada al método que se está testeando.
+         * c) Assert (Afirmar): En esta parte se verifica que el resultado de la acción es el esperado. Se utilizan aserciones para comparar el resultado actual con el esperado.
+         * */
         // Arrange
         RegisterRequestDTO registerRequest = new RegisterRequestDTO("newuser@example.com", "StrongPassword1!");
 

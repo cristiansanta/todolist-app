@@ -46,14 +46,23 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(
             summary = "Register a new user",
-            description = "Register a new user with email and password",
+            description = "Register a new user with username, email and password",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User registered successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input")
             }
     )
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequestDTO registerRequest) {
-        // Validate and sanitize email
+
+        String username = registerRequest.getUsername();
+        if (username == null || username.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: Username cannot be empty!");
+        }
+        if (username.length() > 50) {
+            return ResponseEntity.badRequest().body("Error: Username is too long!");
+        }
+
+        // Validate email
         String email = sanitizeInput(registerRequest.getEmail());
         if (email == null || email.isEmpty()) {
             return ResponseEntity.badRequest().body("Error: Email cannot be empty!");
@@ -86,6 +95,7 @@ public class AuthController {
 
         // Create new user
         UserEntity user = new UserEntity();
+        user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(UserRole.ROLE_USER);
